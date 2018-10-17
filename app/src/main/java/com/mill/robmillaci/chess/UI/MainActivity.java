@@ -322,15 +322,15 @@ public class MainActivity extends AppCompatActivity implements AIThinkTank.minim
                             }
 
 
-                            if (inPlayBoard.currentPlayer().isInCheckMate()){
-                                View v = getLayoutInflater().inflate(R.layout.checkmate_dialog,null);
-                                createAlertDialog(v,true);
+                            if (inPlayBoard.currentPlayer().isInCheckMate()) {
+                                View v = getLayoutInflater().inflate(R.layout.checkmate_dialog, null);
+                                createAlertDialog(v, true);
                             } else {
-                                if(inPlayBoard.currentPlayer().isInCheck()){
-                                    Toast.makeText(getApplicationContext(),"CHECK!",Toast.LENGTH_LONG).show();
-                                } else if (inPlayBoard.currentPlayer().isInStaleMate()){
-                                    View v = getLayoutInflater().inflate(R.layout.checkmate_dialog,null);
-                                    createAlertDialog(v,false);
+                                if (inPlayBoard.currentPlayer().isInCheck()) {
+                                    Toast.makeText(getApplicationContext(), "CHECK!", Toast.LENGTH_LONG).show();
+                                } else if (inPlayBoard.currentPlayer().isInStaleMate()) {
+                                    View v = getLayoutInflater().inflate(R.layout.checkmate_dialog, null);
+                                    createAlertDialog(v, false);
                                 }
                             }
 
@@ -352,12 +352,12 @@ public class MainActivity extends AppCompatActivity implements AIThinkTank.minim
 
     }
 
-    private void createAlertDialog(View v,boolean isitCheckMate) {
+    private void createAlertDialog(View v, boolean isitCheckMate) {
         AlertDialog.Builder alertbuilder = new AlertDialog.Builder(this);
         alertbuilder.setView(v);
         ImageView alertImage = v.findViewById(R.id.checkalertdiagimage);
 
-        if (isitCheckMate){
+        if (isitCheckMate) {
             alertImage.setBackgroundResource(R.drawable.checkmate);
         } else {
             alertImage.setBackgroundResource(R.drawable.stalemate);
@@ -402,15 +402,15 @@ public class MainActivity extends AppCompatActivity implements AIThinkTank.minim
                             playerTurn.setText(inPlayBoard.currentPlayer().getAlliance().isBlack() ? "Black player's turn" : "White player's turn");
 
 
-                            if (inPlayBoard.currentPlayer().isInCheckMate()){
-                                View v = getLayoutInflater().inflate(R.layout.checkmate_dialog,null);
-                                createAlertDialog(v,true);
+                            if (inPlayBoard.currentPlayer().isInCheckMate()) {
+                                View v = getLayoutInflater().inflate(R.layout.checkmate_dialog, null);
+                                createAlertDialog(v, true);
                             } else {
-                                if(inPlayBoard.currentPlayer().isInCheck()){
-                                    Toast.makeText(getApplicationContext(),"CHECK!",Toast.LENGTH_LONG).show();
-                                } else if (inPlayBoard.currentPlayer().isInStaleMate()){
-                                    View v = getLayoutInflater().inflate(R.layout.checkmate_dialog,null);
-                                    createAlertDialog(v,false);
+                                if (inPlayBoard.currentPlayer().isInCheck()) {
+                                    Toast.makeText(getApplicationContext(), "CHECK!", Toast.LENGTH_LONG).show();
+                                } else if (inPlayBoard.currentPlayer().isInStaleMate()) {
+                                    View v = getLayoutInflater().inflate(R.layout.checkmate_dialog, null);
+                                    createAlertDialog(v, false);
                                 }
                             }
 
@@ -869,13 +869,17 @@ public class MainActivity extends AppCompatActivity implements AIThinkTank.minim
     public void getBestMove(Move bestMove) {
         Log.d("THINKTHINK", "getBestMove: called");
         Move m = bestMove;
+
+        Drawable pieceAtDestination = tiles.get(m.getDestinationCoordinate()).getDrawable();
+        int enPassantPawnPosition = 0;
+
         final Move move = Move.MoveFactory.createMove(inPlayBoard, m.getCurrentCoordinate(),
                 m.getDestinationCoordinate());
 
         if (!(m instanceof PawnPromotion)) {
 
             if (move instanceof PawnEnPassantAttackMove) {
-                int enPassantPawnPosition = inPlayBoard.getEnPassantPawn().getPiecePosition();
+                enPassantPawnPosition = inPlayBoard.getEnPassantPawn().getPiecePosition();
 
                 tiles.get(enPassantPawnPosition).setImageDrawable(null);
                 tiles.get(enPassantPawnPosition).setOnClickListener(null);
@@ -889,15 +893,24 @@ public class MainActivity extends AppCompatActivity implements AIThinkTank.minim
                 inPlayBoard = moveTransition.getTransitionBoard();
                 setBoardPieces(tiles);
 
-                if (inPlayBoard.currentPlayer().isInCheckMate()){
-                    View v = getLayoutInflater().inflate(R.layout.checkmate_dialog,null);
-                    createAlertDialog(v,true);
+                if (move instanceof AttackMove && !(move instanceof PawnEnPassantAttackMove)) {
+                    blackPiecesTaken.add(pieceAtDestination);
+                    mBlackAdaptor.notifyDataSetChanged();
+                } else if (move instanceof AttackMove && move instanceof PawnEnPassantAttackMove) {
+                    Drawable enPassantPieceDrawabe = tiles.get(enPassantPawnPosition).getDrawable();
+                    blackPiecesTaken.add(enPassantPieceDrawabe);
+                    mBlackAdaptor.notifyDataSetChanged();
+                }
+
+                if (inPlayBoard.currentPlayer().isInCheckMate()) {
+                    View v = getLayoutInflater().inflate(R.layout.checkmate_dialog, null);
+                    createAlertDialog(v, true);
                 } else {
-                    if(inPlayBoard.currentPlayer().isInCheck()){
-                        Toast.makeText(getApplicationContext(),"CHECK!",Toast.LENGTH_LONG).show();
-                    } else if (inPlayBoard.currentPlayer().isInStaleMate()){
-                        View v = getLayoutInflater().inflate(R.layout.checkmate_dialog,null);
-                        createAlertDialog(v,false);
+                    if (inPlayBoard.currentPlayer().isInCheck()) {
+                        Toast.makeText(getApplicationContext(), "CHECK!", Toast.LENGTH_LONG).show();
+                    } else if (inPlayBoard.currentPlayer().isInStaleMate()) {
+                        View v = getLayoutInflater().inflate(R.layout.checkmate_dialog, null);
+                        createAlertDialog(v, false);
                     }
                 }
 
